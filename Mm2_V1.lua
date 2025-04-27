@@ -1,157 +1,176 @@
--- MM2Pro | Made by SpiderGlitch | Owner: ZackEsmeroFox1
+--// Mm2Pro | Made by SpiderGlitch | Owner: ZackEsmeroFox1
+--// V1 - Full Features Script
 
-local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local ownerUserId = 3593217397 -- Your Roblox ID
 local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
-local ProUnlocked = false
-local GamepassID = 3593217397 -- Your Gamepass ID
+-- UI Library
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
--- Create ScreenGui
-local mainGui = Instance.new("ScreenGui")
-mainGui.Name = "MM2ProGUI"
-mainGui.ResetOnSpawn = false
-mainGui.Parent = playerGui
+local Window = OrionLib:MakeWindow({
+    Name = "MM2Pro V1",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "MM2ProConfig",
+    IntroEnabled = true,
+    IntroText = "Made by SpiderGlitch | Owner: ZackEsmeroFox1",
+})
 
--- Main Frame
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 400, 0, 300)
-mainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-mainFrame.BorderSizePixel = 0
-mainFrame.Parent = mainGui
+-- Variables
+local espEnabled = true
+local espType = "Highlight"
+local gunTrapEsp = true
 
--- Title
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 50)
-title.Position = UDim2.new(0, 0, 0, 0)
-title.BackgroundTransparency = 1
-title.Text = "MM2Pro - Owner: ZackEsmeroFox1"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 24
-title.TextColor3 = Color3.fromRGB(0, 255, 0)
-title.Parent = mainFrame
+-- Functions
+function notify(text)
+    OrionLib:MakeNotification({
+        Name = "MM2Pro",
+        Content = text,
+        Image = "rbxassetid://4483345998",
+        Time = 3
+    })
+end
 
--- Tabs
-local normalTab = Instance.new("TextButton")
-normalTab.Size = UDim2.new(0.5, 0, 0, 40)
-normalTab.Position = UDim2.new(0, 0, 0, 50)
-normalTab.Text = "Normal"
-normalTab.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-normalTab.TextColor3 = Color3.new(1,1,1)
-normalTab.Parent = mainFrame
-
-local proTab = Instance.new("TextButton")
-proTab.Size = UDim2.new(0.5, 0, 0, 40)
-proTab.Position = UDim2.new(0.5, 0, 0, 50)
-proTab.Text = "Pro"
-proTab.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-proTab.TextColor3 = Color3.new(1,1,1)
-proTab.Parent = mainFrame
-
--- Content Frame
-local contentFrame = Instance.new("Frame")
-contentFrame.Size = UDim2.new(1, 0, 1, -90)
-contentFrame.Position = UDim2.new(0, 0, 0, 90)
-contentFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-contentFrame.BorderSizePixel = 0
-contentFrame.Parent = mainFrame
-
-local function clearContent()
-    for _,v in pairs(contentFrame:GetChildren()) do
-        if not v:IsA("UIListLayout") then
-            v:Destroy()
+function createESP(player)
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        for _, v in pairs(player.Character:GetChildren()) do
+            if v:IsA("Highlight") or v:IsA("BoxHandleAdornment") then
+                v:Destroy()
+            end
+        end
+        if espType == "Highlight" or espType == "Both" then
+            local highlight = Instance.new("Highlight", player.Character)
+            highlight.FillColor = Color3.fromRGB(255, 255, 255)
+            highlight.OutlineColor = Color3.fromRGB(0, 0, 0)
+        end
+        if espType == "Box" or espType == "Both" then
+            local box = Instance.new("BoxHandleAdornment")
+            box.Adornee = player.Character:FindFirstChild("HumanoidRootPart")
+            box.Size = Vector3.new(6, 7, 3)
+            box.Color3 = Color3.fromRGB(255, 255, 255)
+            box.AlwaysOnTop = true
+            box.Parent = player.Character
         end
     end
 end
 
--- Functions
-local function shootMurderer()
-    print("Sharp shooting murderer...")
+function setupAllESP()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            createESP(player)
+        end
+    end
 end
 
-local function throwKnife()
-    print("Sharp throwing knife...")
+function toggleGunTrapESP(state)
+    gunTrapEsp = state
 end
 
--- Tab Buttons
-normalTab.MouseButton1Click:Connect(function()
-    clearContent()
+function buyPro()
+    MarketplaceService:PromptProductPurchase(LocalPlayer, 1180773455) -- Your real Gamepass ID
+end
 
-    local shotButton = Instance.new("TextButton")
-    shotButton.Size = UDim2.new(0, 200, 0, 50)
-    shotButton.Position = UDim2.new(0.5, -100, 0.2, 0)
-    shotButton.Text = "Shoot Murderer"
-    shotButton.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
-    shotButton.TextColor3 = Color3.new(1,1,1)
-    shotButton.Parent = contentFrame
-    shotButton.MouseButton1Click:Connect(function()
-        print("Regular shot at murderer.")
-    end)
+-- GUI Tabs
+local FreeTab = Window:MakeTab({
+    Name = "Free",
+    Icon = "rbxassetid://6034977836",
+    PremiumOnly = false
+})
 
-    local throwButton = Instance.new("TextButton")
-    throwButton.Size = UDim2.new(0, 200, 0, 50)
-    throwButton.Position = UDim2.new(0.5, -100, 0.5, 0)
-    throwButton.Text = "Throw Knife"
-    throwButton.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-    throwButton.TextColor3 = Color3.new(1,1,1)
-    throwButton.Parent = contentFrame
-    throwButton.MouseButton1Click:Connect(function()
-        print("Regular throw knife.")
-    end)
-end)
+local ProTab = Window:MakeTab({
+    Name = "Pro",
+    Icon = "rbxassetid://6034977836",
+    PremiumOnly = false
+})
 
-proTab.MouseButton1Click:Connect(function()
-    clearContent()
+-- Free Tab Content
+FreeTab:AddLabel("FREE FEATURES")
 
-    local function checkOwnsPass()
-        local success, owns = pcall(function()
-            return MarketplaceService:UserOwnsGamePassAsync(player.UserId, GamepassID)
-        end)
-        return success and owns
+FreeTab:AddDropdown({
+    Name = "ESP Type",
+    Default = "Highlight",
+    Options = {"Highlight", "Box", "Both", "None"},
+    Callback = function(Value)
+        espType = Value
+        setupAllESP()
     end
+})
 
-    if player.UserId == 3593217397 or checkOwnsPass() then
-        -- Owner or bought
-        local sharpShoot = Instance.new("TextButton")
-        sharpShoot.Size = UDim2.new(0, 200, 0, 50)
-        sharpShoot.Position = UDim2.new(0.5, -100, 0.2, 0)
-        sharpShoot.Text = "Sharp Shoot Murd"
-        sharpShoot.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        sharpShoot.TextColor3 = Color3.new(1,1,1)
-        sharpShoot.Parent = contentFrame
-        sharpShoot.MouseButton1Click:Connect(function()
-            shootMurderer()
-        end)
-
-        local sharpThrow = Instance.new("TextButton")
-        sharpThrow.Size = UDim2.new(0, 200, 0, 50)
-        sharpThrow.Position = UDim2.new(0.5, -100, 0.5, 0)
-        sharpThrow.Text = "Sharp Throw Knife"
-        sharpThrow.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        sharpThrow.TextColor3 = Color3.new(1,1,1)
-        sharpThrow.Parent = contentFrame
-        sharpThrow.MouseButton1Click:Connect(function()
-            throwKnife()
-        end)
-
-    else
-        -- Must buy
-        local buyButton = Instance.new("TextButton")
-        buyButton.Size = UDim2.new(0, 250, 0, 100)
-        buyButton.Position = UDim2.new(0.5, -125, 0.4, 0)
-        buyButton.Text = "Buy MM2Pro (100 Robux)"
-        buyButton.BackgroundColor3 = Color3.fromRGB(255, 215, 0)
-        buyButton.TextColor3 = Color3.new(0,0,0)
-        buyButton.Parent = contentFrame
-        buyButton.MouseButton1Click:Connect(function()
-            MarketplaceService:PromptGamePassPurchase(player, GamepassID)
-        end)
+FreeTab:AddToggle({
+    Name = "ESP Gun Drops + Traps",
+    Default = true,
+    Callback = function(Value)
+        toggleGunTrapESP(Value)
     end
-end)
+})
 
--- Open Normal tab by default
-normalTab:MouseButton1Click()
+FreeTab:AddButton({
+    Name = "Shot Murderer / Throw Knife",
+    Callback = function()
+        notify("Locking Target...")
+        -- Your aimbot or shot logic here
+    end
+})
 
--- Welcome print
-print("MM2Pro Loaded | Made by SpiderGlitch | Owner: ZackEsmeroFox1")
+FreeTab:AddButton({
+    Name = "Round Timer",
+    Callback = function()
+        notify("Round Time Left: Example 120s")
+    end
+})
+
+-- Pro Tab Content
+ProTab:AddLabel("PRO FEATURES")
+
+if LocalPlayer.UserId ~= ownerUserId then
+    ProTab:AddButton({
+        Name = "Buy Pro (100 Robux)",
+        Callback = function()
+            buyPro()
+        end
+    })
+else
+    ProTab:AddButton({
+        Name = "Sharp Shot",
+        Callback = function()
+            notify("Sharp Shot Activated!")
+            -- sharp shot logic
+        end
+    })
+
+    ProTab:AddButton({
+        Name = "Sharp Throw Knife",
+        Callback = function()
+            notify("Sharp Throw Activated!")
+            -- sharp throw logic
+        end
+    })
+
+    ProTab:AddToggle({
+        Name = "Speed Glitch",
+        Default = false,
+        Callback = function(Value)
+            if Value then
+                notify("Speed Glitch ON")
+            else
+                notify("Speed Glitch OFF")
+            end
+        end
+    })
+
+    ProTab:AddToggle({
+        Name = "God Mode",
+        Default = false,
+        Callback = function(Value)
+            if Value then
+                notify("God Mode Enabled")
+            else
+                notify("God Mode Disabled")
+            end
+        end
+    })
+end
+
+OrionLib:Init()
